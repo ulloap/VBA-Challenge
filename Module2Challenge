@@ -1,0 +1,95 @@
+Sub YearlyStocks()
+
+    For Each ws In Worksheets
+    ws.Activate
+' Location
+    ws.Range("I1").Value = "Ticker"
+    ws.Range("J1").Value = "Yearly Change"
+    ws.Range("K1").Value = "Percent Change"
+    ws.Range("L1").Value = "Total Stock Volume"
+    
+    ws.Range("P1").Value = "Ticker"
+    ws.Range("Q1").Value = "Value"
+    ws.Range("O2").Value = "Greatest % Increase"
+    ws.Range("O3").Value = "Greatest % Decrease"
+    ws.Range("O4").Value = "Greatest Total Volume"
+    
+' Variables
+    Dim ticker As String
+    Dim YearlyChange As Double
+    Dim OpenPrice As Double
+    Dim ClosePrice As Double
+    Dim PercentChange As Double
+    Dim TotalVolume As Double
+        TotalVolume = 0
+    Dim SummaryTableRow As Integer
+        SummaryTableRow = 2
+        
+    lastrow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+    OpenPrice = ws.Cells(2, "C").Value
+    
+' Loop
+    For i = 2 To lastrow
+    ticker = ws.Cells(i, "A").Value
+    ClosePrice = ws.Cells(i, "F").Value
+    TotalVolume = TotalVolume + ws.Cells(i, "G").Value
+    
+    ' Ticker
+    If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+        ticker = ws.Cells(i, 1).Value
+        ws.Range("I" & SummaryTableRow).Value = ticker
+        
+        YearlyChange = ClosePrice - OpenPrice
+        ws.Range("J" & SummaryTableRow) = YearlyChange
+        
+        TotalVolume = TotalVolume + ws.Cells(i, "G").Value
+        ws.Range("L" & SummaryTableRow).Value = TotalVolume
+        
+        TotalVolume = 0
+        SummaryTableRow = SummaryTableRow + 1
+        End If
+        
+            If OpenPrice <> 0 Then
+                PercentChange = (YearlyChange / OpenPrice) * 100
+                OpenPrice = ws.Cells(i + 1, "C").Value
+                ws.Range("K" & SummaryTableRow).Value = PercentChange
+            Else
+                PercentChange = 0
+            End If
+
+    Next i
+    
+    lastrow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+    For i = 2 To lastrow
+        If ws.Cells(i, 10).Value >= 0 Then
+            ws.Cells(i, 10).Interior.Color = vbGreen
+        ElseIf Cells(i, 10).Value < 0 Then
+            ws.Cells(i, 10).Interior.Color = vbRed
+        End If
+        
+    If PercentChange < GreatestDecrease Then
+        GreatestDecrease = PercentChange
+        TickerGreatestDecrease = ws.Cells(i, "A").Value
+    End If
+    
+    If PercentChange > GreatestIncrease Then
+        GreatestIncrease = PercentChange
+        TickerGreatestIncrease = ws.Cells(i, "A").Value
+    End If
+        
+        If TotalVolume > GreatestVolume Then
+        GreatestVolume = TotalVolume
+        TickerGreatestVolume = ws.Cells(i, "A").Value
+        End If
+    Next i
+  
+    ws.Range("P2").Value = TickerGreatestIncrease
+    ws.Range("Q2").Value = GreatestIncrease / 100
+    ws.Range("P3").Value = TickerGreatestDecrease
+    ws.Range("Q3").Value = GreatestDecrease / 100
+    ws.Range("P4").Value = TickerGreatestVolume
+    ws.Range("Q4").Value = GreatestVolume
+
+    Next ws
+  
+End Sub
